@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+</head>
+<body>
+    <%- include('partials/nav.ejs') %>
+    This is a page for all users
+
+   <h1> <%= gender %></h1>
+
+   <%# conditional statements in ejs %>
+   <% if (gender== "male") { %>
+        <h1>Male</h1>
+   <% } %>
+
+
+   <%# conditional else if  %>
+
+   <%if (gender == "female") {%>
+        <h1>gender is Female</h1>
+  <% } else {%>
+       <h1>gender is Male</h1>
+  <% }%>
+
+ <div class="d-flex flex-wrap gap-3">
+    <% users.forEach((user, index) => { %>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title"><%= user.firstname %> <%= user.lastname %></h5>
+              <h6 class="card-subtitle mb-2 text-body-secondary"><%= user.email %></h6>
+              <p class="card-text"><%= user.course %></p>
+           
+
+              <div class="d-flex gap-2">
+                <form action="/deleteUser/<%= index %>" method="post">
+
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+                      
+               <form action="/editUser/<%= index %>">
+                <button class="btn btn-primary">Edit</button>
+               </form>
+              </div>
+            </div>
+          </div>
+      <% }) %>
+
+
+      
+ </div>
+
+
+
+
+
+   <script>
+
+   
+   </script>
+</body>
+</html>
