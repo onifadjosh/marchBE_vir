@@ -6,6 +6,7 @@ const mongoose = require("mongoose")
 const UserModel = require("./models/user.model")
 dotenv.config()
 app.use(express.urlencoded({extended:true}))//to help translate the body ejs is sending to node
+app.use(express.json())
 const UserRoute = require("./routes/user.routes")
 
 

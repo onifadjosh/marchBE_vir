@@ -11,16 +11,31 @@ const saveDbUser =async (req, res) => {
   try {
     await UserModel.create(req.body);
     message = "User created successfully";
-    res.render("addDbUser", { message });
+    // res.render("addDbUser", { message });
+    res.status(201).send({
+        message,
+        data:{
+            firstName,
+            lastName,
+            email
+        }
+    });
   } catch (error) {
     console.log(error);
 
     if (error.code == 11000) {
       message = "User already exist";
-      res.render("addDbUser", { message });
+    //   res.render("addDbUser", { message });
+    res.status(400).send({
+        message
+    })
     } else {
       message = "User creation failed";
-      res.render("addDbUser", { message });
+    //   res.render("addDbUser", { message });
+
+    res.status(500).send({
+        message
+    })
     }
   }
 };
@@ -42,8 +57,27 @@ const getDbUser =async (req, res) => {
   }
 };
 
+const deleteDbUser= async(req, res)=>{
+    const {id}= req.params
+
+    try{
+        await UserModel.findByIdAndDelete(id)
+
+        res.status(200).send({
+            message:"user deleted successfully"
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).send({
+            message:"failed to delete user"
+        })
+        
+    }
+}
+
 module.exports={
     getDbUserPage,
     saveDbUser,
-    getDbUser
+    getDbUser,
+    deleteDbUser
 }
