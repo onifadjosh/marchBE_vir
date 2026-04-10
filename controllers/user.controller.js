@@ -150,11 +150,37 @@ const editDbUser= async(req, res)=>{
   }
 }
 
+
+const verifyUser=async(req, res, next)=>{
+  const token = req.headers.authorization.split(" ")[1]?req.headers.authorization.split(" ")[1]:req.headers.authorization.split(" ")[0]
+
+  try {
+    await jwt.verify(token, process.env.APP_TOKEN, function(err, decoded){
+      if(err){
+        console.log(err);
+        res.status(401).send({
+          message:"user unathorized"
+        })
+        return
+      }
+
+
+      console.log(decoded);
+      req.user = decoded
+      next()
+      
+    })
+  } catch (error) {
+    
+  }
+}
+
 module.exports={
     getDbUserPage,
     saveDbUser,
     getDbUser,
     deleteDbUser,
     editDbUser,
-    login
+    login,
+    verifyUser
 }
