@@ -1,4 +1,6 @@
 const UserModel = require("../models/user.model");
+const bcrypt= require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 const getDbUserPage = (req, res) => {
   let message = "";
@@ -9,15 +11,22 @@ const saveDbUser =async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   let message;
   try {
-    await UserModel.create(req.body);
+    let salt = 20
+    let saltRound = await bcrypt.genSalt(salt)
+
+    const hashedPassword = await bcrypt.hash(password, saltRound)
+  const user =  await UserModel.create({firstName, lastName, email, password:hashedPassword});
     message = "User created successfully";
+
+    const token = await jwt.sign({id:user._id}, process.env.APP_TOKEN, {expiresIn:"5h"})
     // res.render("addDbUser", { message });
     res.status(201).send({
         message,
         data:{
             firstName,
             lastName,
-            email
+            email,
+            token
         }
     });
   } catch (error) {
@@ -40,6 +49,52 @@ const saveDbUser =async (req, res) => {
   }
 };
 
+
+const login = async(req, res)=>{
+  const {email, password}= req.body
+  try {
+    
+    const user = await UserModel.findOne({email})
+    if(!user){
+      res.status(404).send({
+        message:"invalid credentials"
+      })
+
+      return
+    }
+
+    const isMatch= await bcrypt.compare(password, user.password)
+
+    if(!isMatch){
+      res.status(404).send({
+        message:"invalid credentials"
+      })
+
+      return
+    }
+    const token = await jwt.sign({id:user._id}, process.env.APP_TOKEN, {expiresIn:"5h"})
+    res.status(200).send({
+      message:"user logged in successful",
+      data:{
+        email,
+        firstName:user.firstName,
+        lastName:user.lastName,
+        token
+
+      }
+    })
+
+
+  } catch (error) {
+
+    console.log(error);
+    res.status(404).send({
+      message:"invalid credentials"
+    })
+    
+    
+  }
+}
 const getDbUser =async (req, res) => {
   try {
     let users = await UserModel.find().select("-password");
@@ -75,9 +130,31 @@ const deleteDbUser= async(req, res)=>{
     }
 }
 
+const editDbUser= async(req, res)=>{
+  const {id}= req.params
+  const {firstName}= req.body
+
+  try {
+    await UserModel.findByIdAndUpdate(id, {firstName}, {new:true, runValidators:true})
+
+    res.status(200).send({
+      message:"user updated successfully"
+    })
+    
+  } catch (error) {
+    console.log(error);
+    
+    res.status(400).send({
+      message:"error updating user"
+    })
+  }
+}
+
 module.exports={
     getDbUserPage,
     saveDbUser,
     getDbUser,
-    deleteDbUser
+    deleteDbUser,
+    editDbUser,
+    login
 }
