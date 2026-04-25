@@ -1,13 +1,16 @@
 const express = require("express")
 const app = express()
 app.set('view engine', 'ejs')
+const cors = require("cors")
 const dotenv = require("dotenv")
 const mongoose = require("mongoose")
 const UserModel = require("./models/user.model")
 dotenv.config()
 app.use(express.urlencoded({extended:true}))//to help translate the body ejs is sending to node
 app.use(express.json())
+app.use(cors())
 const UserRoute = require("./routes/user.routes")
+
 
 
 
